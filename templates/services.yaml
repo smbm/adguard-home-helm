@@ -54,7 +54,10 @@ spec:
   selector:
     {{- include "adguard-home.selectorLabels" . | nindent 4 }}
   type: {{ .Values.services.dns.type }}
-  loadBalancerIP:
+  {{- if eq .Values.services.dns.type "LoadBalancer" }}
+  loadBalancerIP: {{ .Values.services.dns.loadBalancerIP }}
+  externalTrafficPolicy: Local
+  {{- end }}
   ports:
   - port: {{ .Values.services.dns.port }}
     name: dns-tcp
@@ -75,6 +78,7 @@ spec:
   type: {{ .Values.services.dns.type }}
   {{- if eq .Values.services.dns.type "LoadBalancer" }}
   loadBalancerIP: {{ .Values.services.dns.loadBalancerIP }}
+  externalTrafficPolicy: Local
   {{- end }}
   ports:
   - port: {{ .Values.services.dns.port }}
@@ -88,12 +92,17 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "adguard-home.fullname" . }}-dot
+  {{- if eq .Values.services.dns.type "LoadBalancer" }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "adguard-LB"
+  {{- end }}
 spec:
   selector:
     {{- include "adguard-home.selectorLabels" . | nindent 4 }}
   type: {{ .Values.services.dnsOverTls.type }}
   {{- if eq .Values.services.dns.type "LoadBalancer" }}
   loadBalancerIP: {{ .Values.services.dns.loadBalancerIP }}
+  externalTrafficPolicy: Local
   {{- end }}
   ports:
   - port: {{ .Values.services.dnsOverTls.port }}
@@ -106,10 +115,18 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "adguard-home.fullname" . }}-doq
+  {{- if eq .Values.services.dns.type "LoadBalancer" }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "adguard-LB"
+  {{- end }}
 spec:
   selector:
     {{- include "adguard-home.selectorLabels" . | nindent 4 }}
   type: {{ .Values.services.dnsOverQuic.type }}
+  {{- if eq .Values.services.dns.type "LoadBalancer" }}
+  loadBalancerIP: {{ .Values.services.dns.loadBalancerIP }}
+  externalTrafficPolicy: Local
+  {{- end }}
   ports:
   - port: {{ .Values.services.dnsOverQuic.port1 }}
     name: dns-over-quic-1
@@ -126,10 +143,18 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "adguard-home.fullname" . }}-dnscrypt
+  {{- if eq .Values.services.dns.type "LoadBalancer" }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "adguard-LB"
+  {{- end }}
 spec:
   selector:
     {{- include "adguard-home.selectorLabels" . | nindent 4 }}
   type: {{ .Values.services.dnscrypt.type }}
+  {{- if eq .Values.services.dns.type "LoadBalancer" }}
+  loadBalancerIP: {{ .Values.services.dns.loadBalancerIP }}
+  externalTrafficPolicy: Local
+  {{- end }}
   ports:
   - name: dnscrypt-tcp
     port: {{ .Values.services.dnscrypt.port }}
