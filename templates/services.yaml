@@ -46,6 +46,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "adguard-home.fullname" . }}-dns-tcp
+  {{- if eq .Values.services.dns.type "LoadBalancer" }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "adguard-LB"
+  {{- end }}
 spec:
   selector:
     {{- include "adguard-home.selectorLabels" . | nindent 4 }}
@@ -61,6 +65,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "adguard-home.fullname" . }}-dns-udp
+  {{- if eq .Values.services.dns.type "LoadBalancer" }}
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "adguard-LB"
+  {{- end }}
 spec:
   selector:
     {{- include "adguard-home.selectorLabels" . | nindent 4 }}
